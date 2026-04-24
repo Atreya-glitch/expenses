@@ -8,7 +8,10 @@ const authRoutes = require('./routes/auth');
 const expenseRoutes = require('./routes/expenses');
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:8081', credentials: true }));
+app.use(cors({ 
+  origin: ['http://localhost:8081', 'https://frontend-atreyasharma9-9673s-projects.vercel.app'], 
+  credentials: true 
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use('/api/auth', authRoutes);
