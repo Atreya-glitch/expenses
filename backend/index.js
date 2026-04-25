@@ -9,7 +9,7 @@ const expenseRoutes = require('./routes/expenses');
 
 const app = express();
 app.use(cors({ 
-  origin: ['http://localhost:8081', 'https://frontend-atreyasharma9-9673s-projects.vercel.app'], 
+  origin: true, 
   credentials: true 
 }));
 app.use(express.json());
@@ -30,20 +30,28 @@ async function connectDB() {
       await mongoose.connect(mongoUri);
       console.log('Connected to MongoDB Atlas');
     } else {
-      throw new Error('No URI');
+      throw new Error('No MONGO_URI provided in environment variables');
     }
   } catch (err) {
-    console.log('Falling back to mongodb-memory-server...');
-    const { MongoMemoryServer } = require('mongodb-memory-server');
-    const mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri);
-    console.log('Connected to mongodb-memory-server');
+    console.error('Database connection error:', err.message);
+    if (process.env.VERCEL) {
+      // Don't crash on Vercel, just log the error. The function will fail on request.
+    } else {
+      process.exit(1);
+    }
   }
 }
 
-connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}).catch(err => {
-  console.error('Failed to connect to database', err);
-});
+if (process.env.NODE_ENV !== 'test') {
+  connectDB().then(() => {
+    if (process.env.VERCEL) {
+      console.log('Running in Vercel environment');
+    } else {
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    }
+  }).catch(err => {
+    console.error('Failed to connect to database', err);
+  });
+}
+
+module.exports = app;

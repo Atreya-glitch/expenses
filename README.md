@@ -79,4 +79,20 @@ A full-stack mobile application built with React Native (Expo), Node.js, Express
 - **Consistency**: Used a unified design system in `theme/colors.js` to ensure the app feels premium and cohesive.
 - **Security**: Implemented `SecureStore` in the frontend to store JWT tokens securely.
 - **UX**: Added refresh controls and loading states to keep the user informed during network requests.
-- **Custom Design**: Avoided generic UI libraries; instead, used custom-styled touchables and inputs for a unique look.
+## Deployment (Vercel)
+
+The app is configured for seamless deployment as a whole to [Vercel](https://vercel.com).
+
+### Steps to Deploy:
+1. **Push to GitHub**: Push your code to a GitHub repository.
+2. **Connect to Vercel**: 
+   - Go to the Vercel Dashboard and click "Add New" -> "Project".
+   - Import your GitHub repository.
+3. **Configure Environment Variables**:
+   - In the Vercel project settings, add the following environment variables:
+     - `MONGO_URI`: Your MongoDB Atlas connection string.
+     - `JWT_SECRET`: Your secret key for JWT.
+     - `NODE_ENV`: Set to `production`.
+4. **Deploy**: Vercel will automatically detect the `vercel.json` at the root and build both the frontend (Expo Web) and the backend (Node.js API).
+
+The frontend will be available at the root URL, and the API will be served from the `/api` path on the same domain.
