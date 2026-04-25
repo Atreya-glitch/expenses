@@ -18,7 +18,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Expense Tracker API is running');
+  res.json({ 
+    status: 'Running', 
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    env: process.env.NODE_ENV
+  });
 });
 
 const PORT = process.env.PORT || 5000;
