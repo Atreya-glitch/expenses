@@ -18,11 +18,18 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Database connection (Non-blocking)
+let dbError = null;
 const mongoUri = process.env.MONGO_URI;
 if (mongoUri) {
   mongoose.connect(mongoUri)
-    .then(() => console.log('Connected to MongoDB Atlas'))
-    .catch(err => console.error('Database connection error:', err.message));
+    .then(() => {
+      console.log('Connected to MongoDB Atlas');
+      dbError = null;
+    })
+    .catch(err => {
+      dbError = err.message;
+      console.error('Database connection error:', err.message);
+    });
 }
 
 // Routes (handle both /api prefix and root for Vercel compatibility)
@@ -35,6 +42,7 @@ app.get(['/', '/api'], (req, res) => {
   res.json({ 
     status: 'Running', 
     database: mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...',
+    dbError: dbError,
     env: process.env.NODE_ENV
   });
 });
