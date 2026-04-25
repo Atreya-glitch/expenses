@@ -8,54 +8,39 @@ const authRoutes = require('./routes/auth');
 const expenseRoutes = require('./routes/expenses');
 
 const app = express();
+
+// Middleware
 app.use(cors({ 
   origin: true, 
   credentials: true 
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+// Database connection (Non-blocking)
+const mongoUri = process.env.MONGO_URI;
+if (mongoUri) {
+  mongoose.connect(mongoUri)
+    .then(() => console.log('Connected to MongoDB Atlas'))
+    .catch(err => console.error('Database connection error:', err.message));
+}
+
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 
 app.get('/', (req, res) => {
   res.json({ 
     status: 'Running', 
-    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...',
     env: process.env.NODE_ENV
   });
 });
 
-const PORT = process.env.PORT || 5000;
-
-async function connectDB() {
-  try {
-    const mongoUri = process.env.MONGO_URI;
-    if (mongoUri) {
-      await mongoose.connect(mongoUri);
-      console.log('Connected to MongoDB Atlas');
-    } else {
-      throw new Error('No MONGO_URI provided in environment variables');
-    }
-  } catch (err) {
-    console.error('Database connection error:', err.message);
-    if (process.env.VERCEL) {
-      // Don't crash on Vercel, just log the error. The function will fail on request.
-    } else {
-      process.exit(1);
-    }
-  }
-}
-
-if (process.env.NODE_ENV !== 'test') {
-  connectDB().then(() => {
-    if (process.env.VERCEL) {
-      console.log('Running in Vercel environment');
-    } else {
-      app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-    }
-  }).catch(err => {
-    console.error('Failed to connect to database', err);
-  });
+// For local development
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
 module.exports = app;
