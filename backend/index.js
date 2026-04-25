@@ -25,11 +25,13 @@ if (mongoUri) {
     .catch(err => console.error('Database connection error:', err.message));
 }
 
-// Routes
+// Routes (handle both /api prefix and root for Vercel compatibility)
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/expenses', expenseRoutes);
 
-app.get('/', (req, res) => {
+app.get(['/', '/api'], (req, res) => {
   res.json({ 
     status: 'Running', 
     database: mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...',
